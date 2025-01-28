@@ -26,7 +26,6 @@ public class MainScreen implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == myButton){
-            System.out.println("Button clicked");
 
             GameScreen myScreen = new GameScreen(20,10,20);
         }
