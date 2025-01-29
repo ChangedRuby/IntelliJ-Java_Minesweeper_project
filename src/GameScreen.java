@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,6 +18,7 @@ public class GameScreen implements ActionListener, MouseListener {
     private int bWidth;
     private int bLength;
     private int sizeX, sizeY;
+    private String[] grass_colours, font_colours;
 
     Random rand = new Random();
 
@@ -52,11 +54,21 @@ public class GameScreen implements ActionListener, MouseListener {
         for(int row = 0; row < sizeX; row++){
             for(int collumn = 0; collumn < sizeY; collumn++){
                 //buttons[row][collumn] = new GameButton(String.format("%d %d", row, collumn), row, collumn, false);
-                buttons[row][collumn] = new GameButton("?", row, collumn, false);
+                buttons[row][collumn] = new GameButton(" ", row, collumn, false);
                 GameButton currentButton = buttons[row][collumn];
 
+                // setup arrays of colours
+                grass_colours = new String[]{"#AAD751","#8db342","#E5C29F","#D7B899"};
+                font_colours = new String[]{"#FFFFFF","#0000FF","#008000","#FF0000","#301934","#550000","#00FFFF","#A020F0","#808080"};
+
                 //currentButton.setBounds(row*bWidth,collumn*bLength,bWidth,bLength);
+                //currentButton.setIcon(new ImageIcon("green_button.png"));
+
                 currentButton.setFont(new Font("Arial", Font.BOLD, bWidth / 4));
+                currentButton.setBorder(new LineBorder(Color.BLACK, 1));
+                currentButton.setForeground(Color.BLACK);
+                currentButton.setBackground(Color.decode(grass_colours[((row  + collumn) % 2)]));
+                currentButton.setMaximumSize(new Dimension(currentButton.getWidth(), currentButton.getHeight()));
                 currentButton.setFocusable(true);
                 currentButton.addActionListener(this);
                 currentButton.addMouseListener(this);
@@ -105,6 +117,11 @@ public class GameScreen implements ActionListener, MouseListener {
         ArrayList<GameButton> checkedNeighbours = this.getNeighbours(pressedX,pressedY, 1);
 
         currentButton.setBombsAround(this.checkAmtBombsAround(pressedX, pressedY, 1));
+        currentButton.setBackground(Color.decode(grass_colours[((currentButton.getbX() + currentButton.getbY()) % 2) + 2]));
+
+        if(!currentButton.isBomb()){
+            currentButton.setForeground(Color.decode(font_colours[currentButton.getBombsAround()]));
+        }
 
         for(int i = 0; i < checkedNeighbours.size(); i++){
             GameButton currentNeighbour = checkedNeighbours.get(i);
@@ -116,6 +133,8 @@ public class GameScreen implements ActionListener, MouseListener {
 
             if(!currentNeighbour.isChecked() && !currentNeighbour.isBomb() && currentButton.getBombsAround() == 0 && !currentButton.isBomb()){
 
+                //currentButton.setBackground(Color.decode(grass_colours[((currentButton.getbX() + currentButton.getbY()) % 2) + 2]));
+
                 if(currentNeighbour.getBombsAround() == 0){
 
                     // only checks the four neighbour tiles # up left down right
@@ -125,6 +144,10 @@ public class GameScreen implements ActionListener, MouseListener {
                     }
                 } else{
                     currentNeighbour.setChecked(true);
+
+                    currentNeighbour.setBackground(Color.decode(grass_colours[((currentNeighbour.getbX() + currentNeighbour.getbY()) % 2) + 2]));
+                    currentNeighbour.setForeground(Color.decode(font_colours[currentNeighbour.getBombsAround()]));
+
                     currentNeighbour.setText(String.format("%d", this.checkAmtBombsAround(checkedNeighbours.get(i).getbX(), checkedNeighbours.get(i).getbY(), 1)));
                 }
             }
