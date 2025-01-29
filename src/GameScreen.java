@@ -11,6 +11,8 @@ import java.util.Random;
 public class GameScreen implements ActionListener, MouseListener {
 
     public JFrame frame = new JFrame();
+    public GridBagConstraints c = new GridBagConstraints();
+
     public GameButton[][] buttons;
     private int bWidth;
     private int bLength;
@@ -26,10 +28,22 @@ public class GameScreen implements ActionListener, MouseListener {
 
         buttons = new GameButton[sizeX][sizeY];
 
+        frame.setLayout(new GridBagLayout());
+        c.insets = new Insets(0,0,0,0);
+
+        c.gridx = 0;
+        c.gridy = 0;
+        c.ipadx = sizeX;
+        c.ipady = sizeY;
+        c.weightx = 1.0;
+        c.weighty = 1.0;
+        c.fill = GridBagConstraints.BOTH;
+        c.anchor = GridBagConstraints.CENTER;
+
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setTitle("Game");
-        frame.setSize(420,420);
-        frame.setLayout(null);
+        frame.setSize(840,840);
+        frame.setResizable(false);
         frame.setLocationRelativeTo(null);
         //frame.setLayout(new GridLayout(Math.min(sizeX, sizeY), Math.min(sizeX,sizeY)));
         frame.setVisible(true);
@@ -41,14 +55,21 @@ public class GameScreen implements ActionListener, MouseListener {
                 buttons[row][collumn] = new GameButton("?", row, collumn, false);
                 GameButton currentButton = buttons[row][collumn];
 
-                currentButton.setBounds(row*bWidth,collumn*bLength,bWidth,bLength);
+                //currentButton.setBounds(row*bWidth,collumn*bLength,bWidth,bLength);
                 currentButton.setFont(new Font("Arial", Font.BOLD, bWidth / 4));
                 currentButton.setFocusable(true);
                 currentButton.addActionListener(this);
                 currentButton.addMouseListener(this);
+                currentButton.setFocusable(false);
+                //currentButton.setIcon(new ImageIcon("https://images.emojiterra.com/google/noto-emoji/unicode-15/color/512px/1f6a9.png"));
 
-                frame.add(currentButton);
+                frame.add(currentButton, c);
+
+                c.gridy++;
             }
+
+            c.gridx++;
+            c.gridy = 0;
         }
 
         for(int i = 0; i < bombDensity; i++){
@@ -86,20 +107,25 @@ public class GameScreen implements ActionListener, MouseListener {
         currentButton.setBombsAround(this.checkAmtBombsAround(pressedX, pressedY, 1));
 
         for(int i = 0; i < checkedNeighbours.size(); i++){
-            checkedNeighbours.get(i).setBombsAround(checkAmtBombsAround(checkedNeighbours.get(i).getbX(), checkedNeighbours.get(i).getbY(), 1));
+            GameButton currentNeighbour = checkedNeighbours.get(i);
 
-            if(!checkedNeighbours.get(i).isChecked() && !checkedNeighbours.get(i).isBomb() && currentButton.getBombsAround() == 0){
+            // currentNeighbour is the neighbour being checked
+            // currentButton is the root
 
-                if(checkedNeighbours.get(i).getBombsAround() == 0){
+            currentNeighbour.setBombsAround(checkAmtBombsAround(currentNeighbour.getbX(), currentNeighbour.getbY(), 1));
 
-                    // only checks the four neighbour tiles
-                    if(checkedNeighbours.get(i).getbX() == pressedX || checkedNeighbours.get(i).getbY() == pressedY){
-                        checkedNeighbours.get(i).setChecked(true);
-                        this.checkForBombs(checkedNeighbours.get(i).getbX(), checkedNeighbours.get(i).getbY(), checkedNeighbours.get(i));
+            if(!currentNeighbour.isChecked() && !currentNeighbour.isBomb() && currentButton.getBombsAround() == 0 && !currentButton.isBomb()){
+
+                if(currentNeighbour.getBombsAround() == 0){
+
+                    // only checks the four neighbour tiles # up left down right
+                    if(currentNeighbour.getbX() == pressedX || currentNeighbour.getbY() == pressedY){
+                        currentNeighbour.setChecked(true);
+                        this.checkForBombs(currentNeighbour.getbX(), currentNeighbour.getbY(), currentNeighbour);
                     }
                 } else{
-                    checkedNeighbours.get(i).setChecked(true);
-                    checkedNeighbours.get(i).setText(String.format("%d", this.checkAmtBombsAround(checkedNeighbours.get(i).getbX(), checkedNeighbours.get(i).getbY(), 1)));
+                    currentNeighbour.setChecked(true);
+                    currentNeighbour.setText(String.format("%d", this.checkAmtBombsAround(checkedNeighbours.get(i).getbX(), checkedNeighbours.get(i).getbY(), 1)));
                 }
             }
 
@@ -109,7 +135,7 @@ public class GameScreen implements ActionListener, MouseListener {
             currentButton.setText("B");
         } else{
             if(currentButton.getBombsAround() == 0){
-                currentButton.setText("");
+                currentButton.setText(" ");
             } else{
                 currentButton.setText(String.format("%d", currentButton.getBombsAround()));
             }
@@ -205,8 +231,6 @@ public class GameScreen implements ActionListener, MouseListener {
             int pressedX = ((GameButton) e.getSource()).getbX();
             int pressedY = ((GameButton) e.getSource()).getbY();
             GameButton currentButton = buttons[pressedX][pressedY];
-
-            System.out.printf("%d %d\n", pressedX, pressedY);
 
             if(!currentButton.isChecked()){
                 if(currentButton.isFlagged()){
