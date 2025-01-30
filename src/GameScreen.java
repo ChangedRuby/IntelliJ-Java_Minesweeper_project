@@ -1,15 +1,15 @@
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
-public class GameScreen implements ActionListener, MouseListener {
+public class GameScreen implements ActionListener, MouseListener, ComponentListener {
 
     public JFrame frame = new JFrame();
     public GridBagConstraints c = new GridBagConstraints();
@@ -28,11 +28,17 @@ public class GameScreen implements ActionListener, MouseListener {
         this.sizeX = sizeX;
         this.sizeY = sizeY;
 
+        try{
+            imageMaster = ImageIO.read(new File("minesweeper_flag.png"));
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+
         buttons = new GameButton[sizeX][sizeY];
 
         frame.setLayout(new GridBagLayout());
-        c.insets = new Insets(0,0,0,0);
 
+        c.insets = new Insets(0,0,0,0);
         c.gridx = 0;
         c.gridy = 0;
         c.ipadx = sizeX;
@@ -45,7 +51,7 @@ public class GameScreen implements ActionListener, MouseListener {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setTitle("Game");
         frame.setSize(840,840);
-        frame.setResizable(false);
+        frame.setResizable(true);
         frame.setLocationRelativeTo(null);
         //frame.setLayout(new GridLayout(Math.min(sizeX, sizeY), Math.min(sizeX,sizeY)));
         frame.setVisible(true);
@@ -69,10 +75,11 @@ public class GameScreen implements ActionListener, MouseListener {
                 currentButton.setForeground(Color.BLACK);
                 currentButton.setBackground(Color.decode(grass_colours[((row  + collumn) % 2)]));
                 currentButton.setMaximumSize(new Dimension(currentButton.getWidth(), currentButton.getHeight()));
-                currentButton.setFocusable(true);
+                currentButton.setFocusable(false);
+                currentButton.setIcon(null);
                 currentButton.addActionListener(this);
                 currentButton.addMouseListener(this);
-                currentButton.setFocusable(false);
+                currentButton.addComponentListener(this);
                 //currentButton.setIcon(new ImageIcon("https://images.emojiterra.com/google/noto-emoji/unicode-15/color/512px/1f6a9.png"));
 
                 frame.add(currentButton, c);
@@ -118,6 +125,7 @@ public class GameScreen implements ActionListener, MouseListener {
 
         currentButton.setBombsAround(this.checkAmtBombsAround(pressedX, pressedY, 1));
         currentButton.setBackground(Color.decode(grass_colours[((currentButton.getbX() + currentButton.getbY()) % 2) + 2]));
+        currentButton.setIcon(null);
 
         if(!currentButton.isBomb()){
             currentButton.setForeground(Color.decode(font_colours[currentButton.getBombsAround()]));
@@ -147,6 +155,7 @@ public class GameScreen implements ActionListener, MouseListener {
 
                     currentNeighbour.setBackground(Color.decode(grass_colours[((currentNeighbour.getbX() + currentNeighbour.getbY()) % 2) + 2]));
                     currentNeighbour.setForeground(Color.decode(font_colours[currentNeighbour.getBombsAround()]));
+                    currentNeighbour.setIcon(null);
 
                     currentNeighbour.setText(String.format("%d", this.checkAmtBombsAround(checkedNeighbours.get(i).getbX(), checkedNeighbours.get(i).getbY(), 1)));
                 }
@@ -247,6 +256,9 @@ public class GameScreen implements ActionListener, MouseListener {
 
     }
 
+    private BufferedImage imageMaster;
+    private Image imageScaled;
+
     @Override
     public void mouseClicked(MouseEvent e) {
         if(e.getSource() instanceof GameButton && e.getButton() == MouseEvent.BUTTON3){
@@ -258,12 +270,67 @@ public class GameScreen implements ActionListener, MouseListener {
             if(!currentButton.isChecked()){
                 if(currentButton.isFlagged()){
                     currentButton.setFlagged(false);
-                    currentButton.setText("?");
+                    currentButton.setText(" ");
+                    currentButton.setIcon(null);
                 } else{
                     currentButton.setFlagged(true);
-                    currentButton.setText("F");
+                    currentButton.setText("");
+                    currentButton.setIcon(new ImageIcon(imageScaled));
                 }
             }
         }
+    }
+
+    private GameButton currentButton;
+    private Dimension size;
+    private Insets insets;
+
+    @Override
+    public void componentResized(ComponentEvent e) {
+        //System.out.println("size");
+
+        currentButton = (GameButton) e.getComponent();
+        size = currentButton.getSize();
+        insets = currentButton.getInsets();
+
+        int dimension = Math.min(size.width - insets.left - insets.right, size.height - insets.top - insets.bottom);
+
+        currentButton.setFont(new Font("Arial", Font.BOLD, size.height / 2));
+
+        //size.width -= insets.left + insets.right;
+        //size.height -= insets.top + insets.bottom;
+
+        size.width = dimension;
+        size.height = dimension;
+
+        /*
+        if(size.width > size.height){
+            size.width = -1;
+        } else{
+            size.height = -1;
+        }
+        */
+
+        if(imageMaster != null){
+            imageScaled = imageMaster.getScaledInstance(size.width, size.height, Image.SCALE_SMOOTH);
+        }
+        currentButton.setPreferredSize(new Dimension(size.width, size.height));
+        //currentButton.setIcon(new ImageIcon(imageScaled));
+
+    }
+
+    @Override
+    public void componentMoved(ComponentEvent e) {
+
+    }
+
+    @Override
+    public void componentShown(ComponentEvent e) {
+
+    }
+
+    @Override
+    public void componentHidden(ComponentEvent e) {
+
     }
 }
