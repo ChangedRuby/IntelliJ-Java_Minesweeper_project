@@ -6,7 +6,6 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 
 public class GameScreen implements ActionListener, MouseListener, ComponentListener {
@@ -20,6 +19,7 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
     private int sizeX, sizeY;
     private String[] grass_colours, font_colours;
     private Color original_color;
+    public int amtMoves;
 
     Random rand = new Random();
 
@@ -29,9 +29,10 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
         this.sizeX = sizeX;
         this.sizeY = sizeY;
 
-        GameButton.amtBtn = 0;
+        GameButton.amtTiles = 0;
         GameButton.amtBomb = 0;
         GameButton.amtChecked = 0;
+        this.amtMoves = 0;
 
         try{
             imageMaster = ImageIO.read(new File("minesweeper_flag.png"));
@@ -56,6 +57,7 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setTitle("Game");
         frame.setSize(840,840);
+        frame.setMinimumSize(new Dimension(180,180));
         frame.setResizable(true);
         frame.setLocationRelativeTo(null);
         //frame.setLayout(new GridLayout(Math.min(sizeX, sizeY), Math.min(sizeX,sizeY)));
@@ -101,8 +103,8 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
             c.gridy = 0;
         }
 
-        if(bombDensity < sizeX * sizeY){
-            this.setupMines(bombDensity);
+        if(bombDensity <= sizeX * sizeY){
+            this.placeBombs(bombDensity);
         } else{
             System.out.println("Too many bombs!");
         }
@@ -114,17 +116,21 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
         */
     }
 
-    private void setupMines(int bombDensity){
+    private void placeBombs(int bombDensity){
 
-        for(int i = 0; i < bombDensity; i++){
-            int randX = rand.nextInt(sizeX);
-            int randY = rand.nextInt(sizeY);
+        if(GameButton.amtTiles - GameButton.amtBomb >= bombDensity){
+            for(int i = 0; i < bombDensity; i++){
+                int randX = rand.nextInt(sizeX);
+                int randY = rand.nextInt(sizeY);
 
-            if(!buttons[randX][randY].isBomb()){
-                buttons[randX][randY].setBomb(true);
-            } else{
-                i--;
+                if(!buttons[randX][randY].isBomb()){
+                    buttons[randX][randY].setBomb(true);
+                } else{
+                    i--;
+                }
             }
+        } else{
+            System.out.println("No tiles to place bombs");
         }
     }
 
@@ -134,12 +140,24 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
             int pressedX = ((GameButton) e.getSource()).getbX();
             int pressedY = ((GameButton) e.getSource()).getbY();
             GameButton currentButton = buttons[pressedX][pressedY];
-            //System.out.println("Clicked");
+            this.amtMoves++;
 
+            //System.out.println("Clicked");
+            /*
             System.out.println(GameButton.amtBtn);
             System.out.println(GameButton.amtBomb);
-
+            */
             //System.out.println(((GameButton) e.getSource()).getbX() + " " + ((GameButton) e.getSource()).getbY() + " " + ((GameButton) e.getSource()).isBomb());
+
+            if(currentButton.isBomb()){
+                // if the clicked bomb is a bomb and it is the first move, delete the bomb and replace it in another place
+                if(this.amtMoves == 1){
+                    this.placeBombs(1);
+                    currentButton.setBomb(false);
+                } else{
+                    System.out.println("You lose");
+                }
+            }
 
             // check neighbour tiles to count bombs
             this.checkForBombs(pressedX, pressedY, currentButton);
@@ -195,6 +213,7 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
 
         if(currentButton.isBomb()){
             currentButton.setText("B");
+            currentButton.setBackground(Color.RED);
         } else{
             if(currentButton.getBombsAround() == 0){
                 currentButton.setText(" ");
@@ -267,7 +286,7 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
     }
 
     public void checkWinCondition(){
-        if(GameButton.amtChecked >= GameButton.amtBtn - GameButton.amtBomb){
+        if(GameButton.amtChecked >= GameButton.amtTiles - GameButton.amtBomb){
             System.out.println("Ganhou");
 
             MainScreen mainScreen = new MainScreen();
@@ -362,7 +381,11 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
             imageScaled = imageMaster.getScaledInstance(size.width, size.height, Image.SCALE_SMOOTH);
         }
         //currentButton.setPreferredSize(new Dimension(size.width, size.height));
-        //currentButton.setIcon(new ImageIcon(imageScaled));
+        if(currentButton.isFlagged() && !currentButton.isChecked() && currentButton.getIcon().getIconHeight() != imageScaled.getHeight(null) &&
+                currentButton.getIcon().getIconWidth() != imageScaled.getWidth(null)){
+
+            currentButton.setIcon(new ImageIcon(imageScaled));
+        }
 
     }
 

@@ -49,7 +49,7 @@ public class MainScreen implements ActionListener {
         if(e.getSource() == myButton){
             System.out.println("Game started");
 
-            GameScreen myScreen = new GameScreen(15,15,20);
+            GameScreen myScreen = new GameScreen(5,5,23);
             frame.dispose();
         }
     }
