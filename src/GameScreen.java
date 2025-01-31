@@ -19,6 +19,7 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
     private int bLength;
     private int sizeX, sizeY;
     private String[] grass_colours, font_colours;
+    private Color original_color;
 
     Random rand = new Random();
 
@@ -27,6 +28,10 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
         bLength = 80;
         this.sizeX = sizeX;
         this.sizeY = sizeY;
+
+        GameButton.amtBtn = 0;
+        GameButton.amtBomb = 0;
+        GameButton.amtChecked = 0;
 
         try{
             imageMaster = ImageIO.read(new File("minesweeper_flag.png"));
@@ -74,7 +79,12 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
                 currentButton.setBorder(new LineBorder(Color.BLACK, 1));
                 currentButton.setForeground(Color.BLACK);
                 currentButton.setBackground(Color.decode(grass_colours[((row  + collumn) % 2)]));
-                currentButton.setMaximumSize(new Dimension(currentButton.getWidth(), currentButton.getHeight()));
+                original_color = currentButton.getBackground();
+
+                // limits the button size
+                currentButton.setPreferredSize(currentButton.getSize());
+                currentButton.setMaximumSize(currentButton.getPreferredSize());
+
                 currentButton.setFocusable(false);
                 currentButton.setIcon(null);
                 currentButton.addActionListener(this);
@@ -91,12 +101,27 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
             c.gridy = 0;
         }
 
+        if(bombDensity < sizeX * sizeY){
+            this.setupMines(bombDensity);
+        } else{
+            System.out.println("Too many bombs!");
+        }
+
+        /*
+        System.out.println(GameButton.amtBtn);
+        System.out.println(GameButton.amtBomb);
+        System.out.println(GameButton.amtChecked);
+        */
+    }
+
+    private void setupMines(int bombDensity){
+
         for(int i = 0; i < bombDensity; i++){
             int randX = rand.nextInt(sizeX);
             int randY = rand.nextInt(sizeY);
 
             if(!buttons[randX][randY].isBomb()){
-                buttons[randX][randY].makeBomb();
+                buttons[randX][randY].setBomb(true);
             } else{
                 i--;
             }
@@ -111,11 +136,16 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
             GameButton currentButton = buttons[pressedX][pressedY];
             //System.out.println("Clicked");
 
+            System.out.println(GameButton.amtBtn);
+            System.out.println(GameButton.amtBomb);
+
             //System.out.println(((GameButton) e.getSource()).getbX() + " " + ((GameButton) e.getSource()).getbY() + " " + ((GameButton) e.getSource()).isBomb());
 
             // check neighbour tiles to count bombs
             this.checkForBombs(pressedX, pressedY, currentButton);
             currentButton.setChecked(true);
+
+            this.checkWinCondition();
         }
     }
 
@@ -236,6 +266,15 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
 
     }
 
+    public void checkWinCondition(){
+        if(GameButton.amtChecked >= GameButton.amtBtn - GameButton.amtBomb){
+            System.out.println("Ganhou");
+
+            MainScreen mainScreen = new MainScreen();
+            frame.dispose();
+        }
+    }
+
     @Override
     public void mousePressed(MouseEvent e) {
 
@@ -248,12 +287,20 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
 
     @Override
     public void mouseEntered(MouseEvent e) {
-
+        if(e.getSource() instanceof GameButton){
+            /*
+            GameButton currentButton = (GameButton) e.getSource();
+            currentButton.setBackground(currentButton.getBackground().brighter());
+            */
+        }
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-
+        if(e.getSource() instanceof GameButton){
+            //GameButton currentButton = (GameButton) e.getSource();
+            //currentButton.setBackground(original_color);
+        }
     }
 
     private BufferedImage imageMaster;
@@ -314,7 +361,7 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
         if(imageMaster != null){
             imageScaled = imageMaster.getScaledInstance(size.width, size.height, Image.SCALE_SMOOTH);
         }
-        currentButton.setPreferredSize(new Dimension(size.width, size.height));
+        //currentButton.setPreferredSize(new Dimension(size.width, size.height));
         //currentButton.setIcon(new ImageIcon(imageScaled));
 
     }

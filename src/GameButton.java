@@ -7,15 +7,21 @@ public class GameButton extends JButton {
     private int bombsAround;
     private boolean isChecked = false;
     private boolean isFlagged = false;
+    public static int amtBtn;
+    public static int amtBomb;
+    public static int amtChecked;
 
     public GameButton(String text, int x, int y, boolean isBomb) {
         super.setText(text);
         this.x = x;
         this.y = y;
+
+        amtBtn++;
     }
 
-    public void makeBomb(){
-        this.isBomb = true;
+    public void setBomb(boolean isBomb){
+        this.isBomb = isBomb;
+        amtBomb++;
     }
 
     public int getbX(){
@@ -43,7 +49,11 @@ public class GameButton extends JButton {
     }
 
     public void setChecked(boolean checked) {
-        isChecked = checked;
+        if(!this.isBomb && !this.isChecked){
+            amtChecked++;
+        }
+
+        this.isChecked = checked;
     }
 
     public boolean isFlagged() {
