@@ -7,15 +7,30 @@ public class GameButton extends JButton {
     private int bombsAround;
     private boolean isChecked = false;
     private boolean isFlagged = false;
+    public static int amtTiles;
+    public static int amtBomb;
+    public static int amtChecked;
 
     public GameButton(String text, int x, int y, boolean isBomb) {
         super.setText(text);
         this.x = x;
         this.y = y;
+
+        amtTiles++;
     }
 
-    public void makeBomb(){
-        this.isBomb = true;
+    public void setBomb(boolean isBomb){
+
+        // only changes the amtBomb if the current state is not isBomb
+        if(isBomb != this.isBomb()){
+            this.isBomb = isBomb;
+
+            if(isBomb){
+                amtBomb++;
+            } else{
+                amtBomb--;
+            }
+        }
     }
 
     public int getbX(){
@@ -43,7 +58,13 @@ public class GameButton extends JButton {
     }
 
     public void setChecked(boolean checked) {
-        isChecked = checked;
+
+        // tiles that are bombs does not count as checked
+        if(!this.isBomb && !this.isChecked){
+            amtChecked++;
+        }
+
+        this.isChecked = checked;
     }
 
     public boolean isFlagged() {
