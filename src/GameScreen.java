@@ -35,7 +35,7 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
         this.amtMoves = 0;
 
         try{
-            imageMaster = ImageIO.read(new File("minesweeper_flag.png"));
+            imageMaster = ImageIO.read(new File("sprites/minesweeper_flag.png"));
         } catch(Exception e){
             e.printStackTrace();
         }
@@ -78,7 +78,7 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
                 //currentButton.setIcon(new ImageIcon("green_button.png"));
 
                 currentButton.setFont(new Font("Arial", Font.BOLD, bWidth / 4));
-                currentButton.setBorder(new LineBorder(Color.BLACK, 1));
+                currentButton.setBorder(new LineBorder(Color.BLACK, 0));
                 currentButton.setForeground(Color.BLACK);
                 currentButton.setBackground(Color.decode(grass_colours[((row  + collumn) % 2)]));
                 original_color = currentButton.getBackground();
@@ -156,6 +156,9 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
                     currentButton.setBomb(false);
                 } else{
                     System.out.println("You lose");
+
+                    //MainScreen mainScreen = new MainScreen();
+                    //frame.dispose();
                 }
             }
 
@@ -172,11 +175,11 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
         ArrayList<GameButton> checkedNeighbours = this.getNeighbours(pressedX,pressedY, 1);
 
         currentButton.setBombsAround(this.checkAmtBombsAround(pressedX, pressedY, 1));
-        currentButton.setBackground(Color.decode(grass_colours[((currentButton.getbX() + currentButton.getbY()) % 2) + 2]));
-        currentButton.setIcon(null);
 
         if(!currentButton.isBomb()){
+            currentButton.setBackground(Color.decode(grass_colours[((currentButton.getbX() + currentButton.getbY()) % 2) + 2]));
             currentButton.setForeground(Color.decode(font_colours[currentButton.getBombsAround()]));
+            currentButton.setIcon(null);
         }
 
         for(int i = 0; i < checkedNeighbours.size(); i++){
@@ -212,8 +215,9 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
         }
 
         if(currentButton.isBomb()){
-            currentButton.setText("B");
-            currentButton.setBackground(Color.RED);
+            if(!currentButton.isChecked()){
+                this.showAllBombs();
+            }
         } else{
             if(currentButton.getBombsAround() == 0){
                 currentButton.setText(" ");
@@ -235,6 +239,33 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
         }
 
         return bombCount;
+    }
+
+    public void showBomb(GameButton button){
+
+        int rng = rand.nextInt(9);
+        currentButton = button;
+        currentButton.setText("");
+        currentButton.setBackground(Color.decode(font_colours[rng]));
+
+        try{
+            imageMaster = ImageIO.read(new File("sprites/bomb_icon.png"));
+        } catch(Exception e){
+            e.printStackTrace();
+        }
+        currentButton.setChecked(true);
+        currentButton.setIcon(new ImageIcon(imageMaster.getScaledInstance(Math.min(currentButton.getSize().width,currentButton.getSize().height), Math.min(currentButton.getSize().width,currentButton.getSize().height), Image.SCALE_SMOOTH)));
+
+    }
+
+    public void showAllBombs(){
+        for(int i = 0; i < sizeX; i++){
+            for(int j = 0; j < sizeY; j++){
+                if(buttons[i][j].isBomb()){
+                    this.showBomb(buttons[i][j]);
+                }
+            }
+        }
     }
 
     public ArrayList<GameButton> getNeighbours(int x, int y, int radius){
@@ -380,10 +411,13 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
         if(imageMaster != null){
             imageScaled = imageMaster.getScaledInstance(size.width, size.height, Image.SCALE_SMOOTH);
         }
-        //currentButton.setPreferredSize(new Dimension(size.width, size.height));
+
         if(currentButton.isFlagged() && !currentButton.isChecked() && currentButton.getIcon().getIconHeight() != imageScaled.getHeight(null) &&
                 currentButton.getIcon().getIconWidth() != imageScaled.getWidth(null)){
 
+            currentButton.setIcon(new ImageIcon(imageScaled));
+        }
+        if(currentButton.isChecked() && currentButton.isBomb()){
             currentButton.setIcon(new ImageIcon(imageScaled));
         }
 
