@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/javaframe.iml" filepath="$PROJECT_DIR$/javaframe.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Java Minesweeper.iml" filepath="$PROJECT_DIR$/Java Minesweeper.iml" />
     </modules>
   </component>
 </project>
