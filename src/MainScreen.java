@@ -48,7 +48,7 @@ public class MainScreen implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == myButton){
           
-            GameScreen myScreen = new GameScreen(5,5,23);
+            GameScreen myScreen = new GameScreen(20,10,20);
             frame.dispose();
         }
     }
