@@ -10,23 +10,24 @@ public class MainScreen implements ActionListener, ChangeListener {
 
     private JFrame frame = new JFrame();
     private GridBagConstraints c = new GridBagConstraints();
-    private JButton myButton = new JButton("Start");
-    private JLabel myLabel = new JLabel("Minesweeper");
+    private JButton startButton = new JButton("Start");
+    private JLabel titleLabel = new JLabel("Minesweeper");
     public JSlider rSlider = new JSlider(JSlider.HORIZONTAL,5,100,20);
     public JSlider cSlider = new JSlider(JSlider.HORIZONTAL,5,100,20);
-    public JLabel rowLabel = new JLabel();
-    public JLabel colLabel = new JLabel();
+    public JLabel rLabel = new JLabel("Row");
+    public JLabel cLabel = new JLabel("Collumn");
+    JTextField bField = new JTextField();
 
     public MainScreen() {
 
-        myButton.setBounds(160,160,100,50);
-        myButton.setPreferredSize(new Dimension(160,80));
-        myButton.setFocusable(false);
-        myButton.addActionListener(this);
+        startButton.setBounds(160,160,100,50);
+        startButton.setPreferredSize(new Dimension(160,80));
+        startButton.setFocusable(false);
+        startButton.addActionListener(this);
 
-        myLabel.setFont(new Font("Arial", Font.BOLD, 24));
-        myLabel.setHorizontalAlignment(JLabel.CENTER);
-        myLabel.setPreferredSize(new Dimension(200,100));
+        titleLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        titleLabel.setHorizontalAlignment(JLabel.CENTER);
+        titleLabel.setPreferredSize(new Dimension(200,100));
 
         rSlider.setPaintTicks(true);
         rSlider.setPaintLabels(true);
@@ -41,7 +42,7 @@ public class MainScreen implements ActionListener, ChangeListener {
         cSlider.setMinorTickSpacing(5);
         //rSlider.setPreferredSize(new Dimension(1000,200));
         //cSlider.setPreferredSize(new Dimension(1000,200));
-        //myButton.setPreferredSize(new Dimension(200,100));
+        //startButton.setPreferredSize(new Dimension(200,100));
 
         Hashtable labelTable = new Hashtable();
         labelTable.put(5, new JLabel("5"));
@@ -51,11 +52,21 @@ public class MainScreen implements ActionListener, ChangeListener {
         cSlider.setLabelTable(labelTable);
 
         rSlider.addChangeListener(this);
+        cSlider.addChangeListener(this);
 
-        rowLabel.setFont(new Font("Arial", Font.PLAIN, 24));
-        rowLabel.setPreferredSize(new Dimension(1000,10));
-        rowLabel.setSize(1000,10);
-        rowLabel.setHorizontalAlignment(JLabel.LEFT);
+        rLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        rLabel.setPreferredSize(new Dimension(200,20));
+        rLabel.setHorizontalAlignment(JLabel.LEFT);
+        cLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        cLabel.setPreferredSize(new Dimension(200,20));
+        cLabel.setHorizontalAlignment(JLabel.LEFT);
+
+        // sets the texts of the sliders to their value
+        rLabel.setText("Rows: " + rSlider.getValue());
+        cLabel.setText("Cols: " + cSlider.getValue());
+
+        bField.setPreferredSize(new Dimension(50,20));
+        bField.setText("50");
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setTitle("Minesweeper");
@@ -68,35 +79,40 @@ public class MainScreen implements ActionListener, ChangeListener {
         c.gridy = 0;
         c.ipadx = 0;
         c.ipady = 2;
-        c.weightx = 1.0;
-        c.weighty = 1.0;
+        c.weightx = 0;
+        c.weighty = 0;
         c.fill = GridBagConstraints.NONE;
         c.anchor = GridBagConstraints.CENTER;
 
-        frame.add(myLabel, c);
+        frame.add(titleLabel, c);
         c.gridy = 1;
-        //frame.add(rowLabel, c);
-        c.gridy = 1;
-        frame.add(rSlider, c);
+        frame.add(rLabel, c);
         c.gridy = 2;
-        frame.add(cSlider, c);
+        frame.add(rSlider, c);
         c.gridy = 3;
-        frame.add(myButton, c);
+        frame.add(cLabel, c);
+        c.gridy = 4;
+        frame.add(cSlider, c);
+        c.gridy = 5;
+        frame.add(bField, c);
+        c.gridy = 6;
+        frame.add(startButton, c);
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        if(e.getSource() == myButton){
+        if(e.getSource() == startButton){
           
-            GameScreen myScreen = new GameScreen(20,10,20);
+            GameScreen myScreen = new GameScreen(rSlider.getValue(),cSlider.getValue(),Integer.parseInt(bField.getText()));
             frame.dispose();
         }
     }
 
     @Override
     public void stateChanged(ChangeEvent e) {
-        if(e.getSource() == rSlider){
-            rowLabel.setText("Rows: " + rSlider.getValue());
+        if(e.getSource() == rSlider || e.getSource() == cSlider){
+            rLabel.setText("Rows: " + rSlider.getValue());
+            cLabel.setText("Cols: " + cSlider.getValue());
         }
     }
 }
