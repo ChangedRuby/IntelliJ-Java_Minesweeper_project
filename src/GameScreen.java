@@ -157,14 +157,18 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
             }
 
             // check neighbour tiles to count bombs
-            this.checkForBombs(pressedX, pressedY, currentButton);
+            try{
+                this.checkForBombs(pressedX, pressedY, currentButton);
+            } catch (StackOverflowError err){
+                System.out.println("Stack overflow error");
+            }
             currentButton.setChecked(true);
 
             this.checkWinCondition();
         }
     }
 
-    public void checkForBombs(int pressedX, int pressedY, GameButton currentButton){
+    public void checkForBombs(int pressedX, int pressedY, GameButton currentButton) throws StackOverflowError{
 
         ArrayList<GameButton> checkedNeighbours = this.getNeighbours(pressedX,pressedY, 1);
 
