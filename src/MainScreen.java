@@ -12,8 +12,8 @@ public class MainScreen implements ActionListener, ChangeListener {
     private GridBagConstraints c = new GridBagConstraints();
     private JButton startButton = new JButton("Start");
     private JLabel titleLabel = new JLabel("Minesweeper");
-    public JSlider rSlider = new JSlider(JSlider.HORIZONTAL,5,100,20);
-    public JSlider cSlider = new JSlider(JSlider.HORIZONTAL,5,100,20);
+    public JSlider rSlider = new JSlider(JSlider.HORIZONTAL,5,100,15);
+    public JSlider cSlider = new JSlider(JSlider.HORIZONTAL,5,100,15);
     public JLabel rLabel = new JLabel("Row");
     public JLabel cLabel = new JLabel("Collumn");
     JTextField bField = new JTextField();
@@ -66,7 +66,7 @@ public class MainScreen implements ActionListener, ChangeListener {
         cLabel.setText("Cols: " + cSlider.getValue());
 
         bField.setPreferredSize(new Dimension(50,20));
-        bField.setText("50");
+        bField.setText("20");
 
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setTitle("Minesweeper");
@@ -102,8 +102,10 @@ public class MainScreen implements ActionListener, ChangeListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == startButton){
-          
-            GameScreen myScreen = new GameScreen(rSlider.getValue(),cSlider.getValue(),Integer.parseInt(bField.getText()));
+
+            //GameScreen myScreen = new GameScreen(rSlider.getValue(),cSlider.getValue(),Integer.parseInt(bField.getText()));
+            Thread thread = new Thread(new GameScreen(rSlider.getValue(),cSlider.getValue(),Integer.parseInt(bField.getText())));
+            thread.start();
             frame.dispose();
         }
     }
