@@ -8,7 +8,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Random;
 
-public class GameScreen implements ActionListener, MouseListener, ComponentListener {
+public class GameScreen implements ActionListener, MouseListener, ComponentListener, Runnable {
 
     public JFrame frame = new JFrame();
     public GridBagConstraints c = new GridBagConstraints();
@@ -108,12 +108,6 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
         } else{
             System.out.println("Too many bombs!");
         }
-
-        /*
-        System.out.println(GameButton.amtBtn);
-        System.out.println(GameButton.amtBomb);
-        System.out.println(GameButton.amtChecked);
-        */
     }
 
     private void placeBombs(int bombDensity){
@@ -163,14 +157,18 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
             }
 
             // check neighbour tiles to count bombs
-            this.checkForBombs(pressedX, pressedY, currentButton);
+            try{
+                this.checkForBombs(pressedX, pressedY, currentButton);
+            } catch (StackOverflowError err){
+                System.out.println("Stack overflow error");
+            }
             currentButton.setChecked(true);
 
             this.checkWinCondition();
         }
     }
 
-    public void checkForBombs(int pressedX, int pressedY, GameButton currentButton){
+    public void checkForBombs(int pressedX, int pressedY, GameButton currentButton) throws StackOverflowError{
 
         ArrayList<GameButton> checkedNeighbours = this.getNeighbours(pressedX,pressedY, 1);
 
@@ -216,6 +214,19 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
 
         if(currentButton.isBomb()){
             if(!currentButton.isChecked()){
+
+                Thread loseThread = new Thread(() -> {
+                    try {
+                        Thread.sleep(2000);
+                        System.out.println("Thread awoken");
+
+                        MainScreen mainScreen = new MainScreen();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+                loseThread.start();
+
                 this.showAllBombs();
             }
         } else{
@@ -303,9 +314,7 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
                     checkY = sizeY-1;
                 }
 
-                if(checkX == x && checkY == y){
-
-                } else{
+                if(checkX != x || checkY != y){
                     neighbours.add(buttons[checkX][checkY]);
                 }
             }
@@ -423,6 +432,10 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
 
     }
 
+    public void dispose(){
+        frame.dispose();
+    }
+
     @Override
     public void componentMoved(ComponentEvent e) {
 
@@ -436,5 +449,10 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
     @Override
     public void componentHidden(ComponentEvent e) {
 
+    }
+
+    @Override
+    public void run() {
+        System.out.println("Runnable started");
     }
 }
