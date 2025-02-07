@@ -432,6 +432,10 @@ public class GameScreen implements ActionListener, MouseListener, ComponentListe
 
     }
 
+    public void dispose(){
+        frame.dispose();
+    }
+
     @Override
     public void componentMoved(ComponentEvent e) {
 

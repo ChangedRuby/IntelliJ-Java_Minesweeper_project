@@ -16,7 +16,9 @@ public class MainScreen implements ActionListener, ChangeListener {
     public JSlider cSlider = new JSlider(JSlider.HORIZONTAL,5,100,15);
     public JLabel rLabel = new JLabel("Row");
     public JLabel cLabel = new JLabel("Collumn");
-    JTextField bField = new JTextField();
+    public JLabel bLabel = new JLabel("Bombs: ");
+    public JTextField bField = new JTextField();
+    public static GameScreen activeThread;
 
     public MainScreen() {
 
@@ -60,6 +62,9 @@ public class MainScreen implements ActionListener, ChangeListener {
         cLabel.setFont(new Font("Arial", Font.PLAIN, 12));
         cLabel.setPreferredSize(new Dimension(200,20));
         cLabel.setHorizontalAlignment(JLabel.LEFT);
+        bLabel.setFont(new Font("Arial", Font.PLAIN, 12));
+        bLabel.setPreferredSize(new Dimension(200,20));
+        bLabel.setHorizontalAlignment(JLabel.LEFT);
 
         // sets the texts of the sliders to their value
         rLabel.setText("Rows: " + rSlider.getValue());
@@ -93,7 +98,10 @@ public class MainScreen implements ActionListener, ChangeListener {
         frame.add(cLabel, c);
         c.gridy = 4;
         frame.add(cSlider, c);
+        c.gridx = -1;
         c.gridy = 5;
+        frame.add(bLabel, c);
+        c.gridx = 0;
         frame.add(bField, c);
         c.gridy = 6;
         frame.add(startButton, c);
@@ -103,9 +111,16 @@ public class MainScreen implements ActionListener, ChangeListener {
     public void actionPerformed(ActionEvent e) {
         if(e.getSource() == startButton){
 
-            //GameScreen myScreen = new GameScreen(rSlider.getValue(),cSlider.getValue(),Integer.parseInt(bField.getText()));
-            Thread thread = new Thread(new GameScreen(rSlider.getValue(),cSlider.getValue(),Integer.parseInt(bField.getText())));
+            if(MainScreen.activeThread != null){
+                MainScreen.activeThread.dispose();
+            }
+
+            GameScreen myScreen = new GameScreen(rSlider.getValue(),cSlider.getValue(),Integer.parseInt(bField.getText()));
+            Thread thread = new Thread(
+                    myScreen
+            );
             thread.start();
+            MainScreen.activeThread = myScreen;
             frame.dispose();
         }
     }
